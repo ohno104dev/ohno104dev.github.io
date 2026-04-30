@@ -1,0 +1,1066 @@
+<script setup>
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+// import rightPanelWallpaper from './assets/right-panel-wallpaper.png'
+import rightPanelWallpaper from "./assets/image.png";
+import profileAvatar from "./assets/profile-avatar.png";
+
+const pinnedApps = [
+  {
+    name: "Edge",
+    badge: "E",
+    color: "linear-gradient(135deg, #52c8ff, #2f74ff)",
+    detailTitle: "Browser Workspace",
+    detailBody:
+      "Use the right-side window to show web previews, tabs, and browsing context without overlapping the live Taipei clock.",
+  },
+  {
+    name: "Word",
+    badge: "W",
+    color: "linear-gradient(135deg, #275efe, #2c3e9f)",
+    detailTitle: "Document Workspace",
+    detailBody:
+      "A focused reading and editing surface for reports, specs, and shared notes.",
+  },
+  {
+    name: "Excel",
+    badge: "X",
+    color: "linear-gradient(135deg, #36c275, #0a7847)",
+    detailTitle: "Spreadsheet Workspace",
+    detailBody:
+      "Charts, budgets, and tabular summaries can live in this main window area.",
+  },
+  {
+    name: "PowerPoint",
+    badge: "P",
+    color: "linear-gradient(135deg, #ff7d4a, #ca4427)",
+    detailTitle: "Presentation Workspace",
+    detailBody:
+      "A large stage for slides, layout review, and presenter materials.",
+  },
+  {
+    name: "Outlook",
+    badge: "O",
+    color: "linear-gradient(135deg, #0095ff, #1458d4)",
+    detailTitle: "Communication Workspace",
+    detailBody:
+      "Pin your inbox, meeting agenda, or follow-up tasks on the right.",
+  },
+  {
+    name: "Store",
+    badge: "S",
+    color: "linear-gradient(135deg, #18c8ff, #0078d4)",
+    detailTitle: "Store Workspace",
+    detailBody:
+      "Show application listings, updates, and downloads in the content panel.",
+  },
+  {
+    name: "Settings",
+    badge: "G",
+    color: "linear-gradient(135deg, #9099aa, #667085)",
+    detailTitle: "Settings Workspace",
+    detailBody:
+      "A neutral control surface for preferences, connectivity, and account settings.",
+  },
+  {
+    name: "Photos",
+    badge: "P",
+    color: "linear-gradient(135deg, #4c95ff, #2a5fbf)",
+    detailTitle: "Media Workspace",
+    detailBody:
+      "A larger preview region for image browsing, galleries, and asset details.",
+  },
+  {
+    name: "Xbox",
+    badge: "X",
+    color: "linear-gradient(135deg, #69d24a, #179b3e)",
+    detailTitle: "Gaming Workspace",
+    detailBody:
+      "Use the window for library highlights, updates, and launch actions.",
+  },
+  {
+    name: "Solitaire",
+    badge: "S",
+    color: "linear-gradient(135deg, #59b8ff, #1d83cf)",
+    detailTitle: "Casual Workspace",
+    detailBody:
+      "A relaxed content view for games, scoreboards, and quick previews.",
+  },
+  {
+    name: "Paint",
+    badge: "P",
+    color: "linear-gradient(135deg, #65d8c2, #4198ff)",
+    detailTitle: "Canvas Workspace",
+    detailBody:
+      "A drawing and asset sketching surface with room for larger previews.",
+  },
+  {
+    name: "LinkedIn",
+    badge: "in",
+    color: "linear-gradient(135deg, #3e8cff, #0a66c2)",
+    detailTitle: "Network Workspace",
+    detailBody:
+      "Profiles, hiring notes, and networking activity can appear here.",
+  },
+  {
+    name: "Calculator",
+    badge: "C",
+    color: "linear-gradient(135deg, #7da9ff, #425dcb)",
+    detailTitle: "Utility Workspace",
+    detailBody:
+      "A compact utility view for quick calculations and small tools.",
+  },
+  {
+    name: "Clock",
+    badge: "K",
+    color: "linear-gradient(135deg, #f3f4f6, #d0d5dd)",
+    detailTitle: "Time Workspace",
+    detailBody:
+      "Secondary clocks, timers, and scheduling helpers can render in this area.",
+  },
+  {
+    name: "Notepad",
+    badge: "N",
+    color: "linear-gradient(135deg, #5ed0e6, #2488b6)",
+    detailTitle: "Notes Workspace",
+    detailBody:
+      "Quick notes and scratch text can open in the large right-side window.",
+  },
+  {
+    name: "Snipping Tool",
+    badge: "T",
+    color: "linear-gradient(135deg, #ffb86c, #ff7a59)",
+    detailTitle: "Capture Workspace",
+    detailBody:
+      "Previews, crops, and screenshot history fit naturally in this panel.",
+  },
+];
+
+const recommendedItems = [
+  {
+    name: "Grammarly",
+    badge: "G",
+    color: "linear-gradient(135deg, #37c28d, #178b64)",
+    detailTitle: "Writing Workspace",
+    detailBody:
+      "A focused side window for polished drafts, edits, and AI writing support.",
+  },
+  {
+    name: "Book Report",
+    badge: "W",
+    color: "linear-gradient(135deg, #275efe, #2c3e9f)",
+    detailTitle: "Reading Notes",
+    detailBody:
+      "Use this panel for summaries, reading highlights, and document annotations.",
+  },
+  {
+    name: "Budget Estimate",
+    badge: "X",
+    color: "linear-gradient(135deg, #36c275, #0a7847)",
+    detailTitle: "Budget Workspace",
+    detailBody:
+      "A clean area for forecasts, estimates, and lightweight financial planning.",
+  },
+  {
+    name: "MRP Impact",
+    badge: "X",
+    color: "linear-gradient(135deg, #36c275, #0a7847)",
+    detailTitle: "Planning Workspace",
+    detailBody:
+      "Review manufacturing impacts, planning notes, and quick operational summaries.",
+  },
+  {
+    name: "Figma",
+    badge: "F",
+    color: "linear-gradient(135deg, #b859ff, #ff5f6d)",
+    detailTitle: "Design Workspace",
+    detailBody:
+      "A presentation area for interface drafts, component explorations, and design handoff.",
+  },
+  {
+    name: "Design Concepts",
+    badge: "P",
+    color: "linear-gradient(135deg, #ff7d4a, #ca4427)",
+    detailTitle: "Concept Workspace",
+    detailBody:
+      "Keep moodboards, concept notes, and visual directions visible on the right.",
+  },
+];
+
+const userActions = [
+  { label: "Profile", icon: "D" },
+  { label: "LinkedIn", icon: "in" },
+  { label: "GitHub", icon: "GH" },
+  { label: "Email", icon: "@" },
+];
+
+const selectedApp = ref(null);
+const isWindowOpen = ref(false);
+const isLauncherExpanded = ref(true);
+const taipeiNow = ref(new Date());
+
+let timerId;
+
+onMounted(() => {
+  timerId = window.setInterval(() => {
+    taipeiNow.value = new Date();
+  }, 1000);
+});
+
+onBeforeUnmount(() => {
+  window.clearInterval(timerId);
+});
+
+const dateFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Taipei",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  weekday: "short",
+});
+
+const timeFormatter = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Asia/Taipei",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: false,
+});
+
+const formattedDate = computed(() =>
+  dateFormatter.format(taipeiNow.value).replace(",", "").toUpperCase(),
+);
+const formattedTime = computed(() => timeFormatter.format(taipeiNow.value));
+
+function openWindow(app) {
+  if (selectedApp.value?.name === app.name && isWindowOpen.value) {
+    selectedApp.value = null;
+    isWindowOpen.value = false;
+    return;
+  }
+
+  selectedApp.value = app;
+  isWindowOpen.value = true;
+}
+
+function toggleLauncher() {
+  isLauncherExpanded.value = !isLauncherExpanded.value;
+}
+</script>
+
+<template>
+  <main class="desktop">
+    <div
+      class="desktop-art"
+      :style="{ backgroundImage: `url(${rightPanelWallpaper})` }"
+      aria-hidden="true"
+    >
+      <div class="desktop-art__dots"></div>
+      <div class="desktop-art__hero">
+        <div class="desktop-art__marks">
+          <span class="mark mark--circle"></span>
+          <span class="mark mark--square"></span>
+          <span class="mark mark--triangle"></span>
+        </div>
+        <div class="desktop-art__copy">
+          <p>`fmt.Println("Hello, World")`</p>
+          <p>&gt;&gt; Nice to meet you!</p>
+        </div>
+      </div>
+      <div class="desktop-art__geometry">
+        <span class="geo geo--arc"></span>
+        <span class="geo geo--line"></span>
+        <span class="geo geo--frame"></span>
+      </div>
+    </div>
+
+    <section class="clock-panel">
+      <p class="clock-panel__date">{{ formattedDate }}</p>
+      <p class="clock-panel__time">{{ formattedTime }}</p>
+      <p class="clock-panel__zone">UTC+8 Taipei</p>
+    </section>
+
+    <section class="workspace">
+      <aside
+        class="launcher"
+        :class="{ 'launcher--collapsed': !isLauncherExpanded }"
+      >
+        <div class="launcher-shell">
+          <div class="profile-strip">
+            <button
+              class="launcher-toggle"
+              :class="{ 'launcher-toggle--collapsed': !isLauncherExpanded }"
+              :aria-label="
+                isLauncherExpanded ? 'Collapse launcher' : 'Expand launcher'
+              "
+              @click="toggleLauncher"
+            >
+              <span
+                class="launcher-toggle__disclosure"
+                aria-hidden="true"
+              ></span>
+            </button>
+
+            <div class="profile">
+              <div class="profile__avatar">
+                <img :src="profileAvatar" alt="Felix Huang avatar" />
+              </div>
+              <div class="profile__meta">
+                <strong>Felix Huang</strong>
+                <span>Software Developer</span>
+              </div>
+            </div>
+
+            <div class="profile-actions">
+              <button
+                v-for="action in userActions"
+                :key="action.label"
+                :title="action.label"
+              >
+                {{ action.icon }}
+              </button>
+            </div>
+          </div>
+
+          <div class="launcher__body">
+            <section class="launcher-card">
+              <div class="section-head">
+                <h2>Project</h2>
+              </div>
+
+              <div class="pinned-grid">
+                <button
+                  v-for="app in pinnedApps.slice(0, 9)"
+                  :key="app.name"
+                  class="app-tile"
+                  :class="{
+                    'app-tile--active':
+                      isWindowOpen && selectedApp?.name === app.name,
+                  }"
+                  @click="openWindow(app)"
+                >
+                  <div class="app-icon" :style="{ background: app.color }">
+                    {{ app.badge }}
+                  </div>
+                  <span>{{ app.name }}</span>
+                </button>
+              </div>
+            </section>
+
+            <section class="launcher-card launcher-card--secondary">
+              <div class="section-head section-head--recommended">
+                <h2>Game</h2>
+              </div>
+
+              <div class="recommended-grid">
+                <button
+                  v-for="item in recommendedItems"
+                  :key="item.name"
+                  class="app-tile app-tile--recommended"
+                  :class="{
+                    'app-tile--active':
+                      isWindowOpen && selectedApp?.name === item.name,
+                  }"
+                  @click="openWindow(item)"
+                >
+                  <div class="app-icon" :style="{ background: item.color }">
+                    {{ item.badge }}
+                  </div>
+                  <span>{{ item.name }}</span>
+                </button>
+              </div>
+            </section>
+          </div>
+        </div>
+      </aside>
+
+      <section
+        class="detail-window"
+        :class="{ 'detail-window--open': isWindowOpen }"
+      >
+        <div class="detail-window__frame">
+          <div class="detail-window__bar">
+            <div class="detail-window__title">
+              <div
+                class="detail-window__appicon"
+                :style="{ background: selectedApp?.color }"
+              >
+                {{ selectedApp?.badge }}
+              </div>
+              <div>
+                <strong>{{ selectedApp?.name }}</strong>
+                <span>{{ selectedApp?.detailTitle }}</span>
+              </div>
+            </div>
+
+            <div class="detail-window__controls">
+              <button @click="isWindowOpen = false" aria-label="Close window">
+                <span class="traffic-dot traffic-dot--close"></span>
+                <span class="traffic-dot traffic-dot--minimize"></span>
+                <span class="traffic-dot traffic-dot--zoom"></span>
+              </button>
+            </div>
+          </div>
+
+          <div class="detail-window__body">
+            <div class="markdown-slot">
+              <p># Hello, World</p>
+              <span
+                >This area can become your markdown-driven workspace for project
+                notes, product thinking, and lightweight documentation.</span
+              >
+              <span
+                >I enjoy building interfaces that feel calm, intentional, and a
+                little playful. This panel can be used for portfolio copy,
+                changelogs, meeting notes, or long-form writing.</span
+              >
+              <span>## What could live here</span>
+              <span
+                >- Project overview and goals<br />- Design decisions and
+                references<br />- Technical notes, todos, and next steps</span
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+</template>
+
+<style>
+:root {
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  color: #e5eef7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button {
+  font: inherit;
+}
+
+.desktop {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #020304;
+}
+
+.desktop::before,
+.desktop::after {
+  content: none;
+}
+
+.desktop-art {
+  position: absolute;
+  top: 128px;
+  right: 16px;
+  bottom: 0;
+  left: calc(40% + 36px);
+  overflow: hidden;
+  border-radius: 28px 28px 0 0;
+  background-color: #020304;
+  background-repeat: no-repeat;
+  background-size: auto 100%;
+  background-position: 62% bottom;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 24px 60px rgba(15, 23, 42, 0.18);
+}
+
+.desktop-art > * {
+  display: none;
+}
+
+.clock-panel {
+  position: absolute;
+  top: 18px;
+  right: 32px;
+  z-index: 2;
+  text-align: right;
+  color: #d7fbff;
+  text-shadow: 0 0 10px rgba(98, 239, 255, 0.9);
+}
+
+.clock-panel__date,
+.clock-panel__zone,
+.clock-panel__time {
+  margin: 0;
+}
+
+.clock-panel__date {
+  font-size: 13px;
+  letter-spacing: 4px;
+}
+
+.clock-panel__time {
+  font-size: 60px;
+  line-height: 1;
+  letter-spacing: 8px;
+}
+
+.clock-panel__zone {
+  margin-top: 6px;
+  font-size: 13px;
+  letter-spacing: 2px;
+}
+
+.workspace {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 22px;
+  min-height: calc(100vh - 128px);
+  padding: 128px 16px 0 10px;
+}
+
+.launcher,
+.detail-window {
+  height: calc(100vh - 128px);
+}
+
+.launcher {
+  position: relative;
+  align-self: flex-start;
+  z-index: 1;
+  width: 40%;
+  min-width: 360px;
+  overflow: hidden;
+}
+
+.launcher-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(252, 253, 255, 0.94),
+      rgba(243, 247, 252, 0.9)
+    ),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.04));
+  border-radius: 28px 28px 0 0;
+  color: #0f172a;
+  box-shadow:
+    0 28px 70px rgba(4, 14, 28, 0.22),
+    0 8px 18px rgba(255, 255, 255, 0.12) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.48) inset,
+    0 0 0 1px rgba(148, 163, 184, 0.18);
+  overflow: hidden;
+  transform: translateY(0);
+  transition:
+    transform 0.6s ease,
+    background 0.6s ease,
+    box-shadow 0.6s ease;
+}
+
+.launcher-shell::before {
+  content: "";
+  position: absolute;
+  inset: 108px 0 0;
+  background:
+    radial-gradient(
+      circle at 18% 0%,
+      rgba(255, 255, 255, 0.52),
+      transparent 28%
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 26%);
+  pointer-events: none;
+}
+
+.launcher--collapsed .launcher-shell {
+  transform: translateY(calc(100% - 136px));
+}
+
+.launcher--collapsed .launcher-shell::before {
+  opacity: 0;
+}
+
+.profile-strip {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 40px 26px 28px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #ffffff;
+  border-radius: 28px 28px 0 0;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    transform 0.6s ease,
+    box-shadow 0.6s ease,
+    border-radius 0.6s ease,
+    border-color 0.6s ease;
+}
+
+.launcher-toggle {
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  width: 76px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(226, 232, 240, 0.76);
+  border-top: 0;
+  border-radius: 0 0 24px 24px;
+  background: linear-gradient(180deg, #ffffff, #f4f7fb);
+  transform: translateX(-50%);
+  cursor: pointer;
+  box-shadow:
+    0 10px 20px rgba(15, 23, 42, 0.06),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.76);
+}
+
+.launcher-toggle__disclosure {
+  width: 18px;
+  height: 18px;
+  border-right: 3px solid #5f6f82;
+  border-bottom: 3px solid #5f6f82;
+  transform: rotate(45deg) translate(-1px, -2px);
+  border-radius: 3px;
+  transition: transform 0.6s ease;
+}
+
+.launcher-toggle--collapsed .launcher-toggle__disclosure {
+  transform: rotate(225deg) translate(-1px, -1px);
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: #1f2937;
+  font-size: 15px;
+}
+
+.profile__avatar,
+.app-icon,
+.detail-window__appicon {
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 700;
+}
+
+.profile__avatar {
+  width: 68px;
+  height: 68px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #f8fafc;
+  box-shadow:
+    0 8px 18px rgba(15, 23, 42, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.profile__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.profile__meta strong,
+.profile__meta span {
+  display: block;
+}
+
+.profile__meta strong {
+  font-size: 21px;
+}
+
+.profile__meta span {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 14px;
+}
+
+.profile-actions button,
+.section-head button,
+.catalog-head button {
+  border: 0;
+  background: transparent;
+}
+
+.profile-actions button {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: #fff;
+  color: #334155;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 10px 22px rgba(15, 23, 42, 0.08);
+}
+
+.launcher__body {
+  flex: 1 1 auto;
+  overflow: hidden;
+  max-height: 1000px;
+  padding: 24px 24px 28px;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    max-height 0.6s ease,
+    opacity 0.6s ease,
+    transform 0.6s ease,
+    padding 0.6s ease;
+}
+
+.launcher--collapsed .launcher__body {
+  flex: 0 1 auto;
+  overflow: hidden;
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  opacity: 0;
+  transform: translateY(28px);
+  pointer-events: none;
+}
+
+.launcher-card {
+  position: relative;
+  padding: 22px 20px 24px;
+  border-radius: 24px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.6),
+      rgba(244, 247, 251, 0.48)
+    ),
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.36),
+      rgba(255, 255, 255, 0.12)
+    );
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    0 18px 34px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(16px);
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+
+.launcher-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(
+      circle at 18% 0%,
+      rgba(255, 255, 255, 0.72),
+      transparent 32%
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 34%);
+  pointer-events: none;
+}
+
+.launcher-card--secondary {
+  margin-top: 26px;
+}
+
+.launcher--collapsed .launcher-card {
+  opacity: 0;
+  transform: translateY(26px);
+}
+
+.section-head,
+.catalog-head {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.section-head--recommended {
+  margin-top: 0;
+}
+
+.section-head h2,
+.catalog-head h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1f2937;
+  letter-spacing: 0.04em;
+}
+
+.pinned-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px 18px;
+  position: relative;
+  z-index: 1;
+}
+
+.app-tile {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 14px 8px;
+  border: 1px solid transparent;
+  border-radius: 18px;
+  background: transparent;
+  text-align: center;
+  cursor: pointer;
+}
+
+.app-tile--active {
+  border-color: rgba(191, 219, 254, 0.58);
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.app-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+  font-size: 17px;
+  box-shadow: 0 12px 26px rgba(31, 41, 55, 0.16);
+}
+
+.app-tile span {
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.35;
+  letter-spacing: 0.03em;
+}
+
+.recommended-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px 18px;
+  position: relative;
+  z-index: 1;
+}
+
+.app-tile--recommended {
+  min-height: 112px;
+}
+
+.detail-window {
+  position: absolute;
+  top: 128px;
+  left: calc(40% + 14px);
+  z-index: 3;
+  width: calc(60% - 20px);
+  height: calc(100vh - 128px);
+  opacity: 0;
+  transform: translateX(36px) scale(0.98);
+  pointer-events: none;
+  transition:
+    opacity 180ms ease,
+    transform 220ms ease;
+}
+
+.detail-window--open {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+  pointer-events: auto;
+}
+
+.detail-window__frame {
+  height: 100%;
+  border-radius: 28px 28px 0 0;
+  overflow: hidden;
+  background: rgba(9, 20, 34, 0.72);
+  border: 1px solid rgba(194, 240, 255, 0.18);
+  box-shadow:
+    0 18px 60px rgba(2, 12, 24, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+}
+
+.detail-window__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid rgba(194, 240, 255, 0.1);
+  background: rgba(7, 18, 31, 0.5);
+}
+
+.detail-window__title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.detail-window__appicon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  flex: 0 0 auto;
+}
+
+.detail-window__title strong {
+  display: block;
+  font-size: 15px;
+}
+
+.detail-window__title span {
+  display: block;
+  margin-top: 3px;
+  color: #9db5c9;
+  font-size: 12px;
+}
+
+.detail-window__controls {
+  display: flex;
+  gap: 0;
+}
+
+.detail-window__controls button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 0;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+    0 8px 18px rgba(2, 12, 24, 0.18);
+}
+
+.traffic-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08) inset;
+}
+
+.traffic-dot--close {
+  background: #ff5f57;
+}
+
+.traffic-dot--minimize {
+  background: #febc2e;
+}
+
+.traffic-dot--zoom {
+  background: #28c840;
+}
+
+.detail-window__body {
+  height: calc(100% - 75px);
+  padding: 0;
+}
+
+.markdown-slot {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100%;
+  margin-top: 0;
+  border-radius: 0;
+  border: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(18, 42, 70, 0.84),
+    rgba(7, 22, 39, 0.92)
+  );
+  padding: 32px;
+}
+
+.markdown-slot p,
+.markdown-slot span {
+  margin: 0;
+}
+
+.markdown-slot p {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.markdown-slot span {
+  margin-top: 12px;
+  color: #bfd3e3;
+  line-height: 1.7;
+  font-size: 15px;
+}
+
+@media (max-width: 1100px) {
+  .workspace {
+    flex-direction: column;
+    padding-right: 10px;
+  }
+
+  .launcher,
+  .detail-window {
+    width: 100%;
+    min-width: 0;
+    height: auto;
+  }
+
+  .detail-window {
+    position: relative;
+    top: auto;
+    left: auto;
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  .detail-window__frame {
+    min-height: 540px;
+    border-radius: 26px;
+  }
+}
+
+@media (max-width: 720px) {
+  .workspace {
+    padding-top: 148px;
+  }
+
+  .clock-panel {
+    right: 18px;
+  }
+
+  .desktop-art {
+    top: 148px;
+    right: 12px;
+    left: 12px;
+    background-size: cover;
+    background-position: 60% 42%;
+  }
+
+  .clock-panel__time {
+    font-size: 42px;
+    letter-spacing: 5px;
+  }
+
+  .pinned-grid,
+  .recommended-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+</style>
