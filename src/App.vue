@@ -197,17 +197,109 @@ const selectedApp = ref(null);
 const isWindowOpen = ref(false);
 const isLauncherExpanded = ref(true);
 const taipeiNow = ref(new Date());
+const cursorX = ref(0);
+const cursorY = ref(0);
+const isCursorVisible = ref(false);
+const isCursorPressed = ref(false);
+const isCursorOnLightSurface = ref(false);
 
 let timerId;
+let canUseTouchCursor = false;
+
+function parseColorChannels(color) {
+  const matched = color.match(/[\d.]+/g);
+
+  if (!matched || matched.length < 3) {
+    return null;
+  }
+
+  return {
+    r: Number(matched[0]),
+    g: Number(matched[1]),
+    b: Number(matched[2]),
+    a: matched[3] === undefined ? 1 : Number(matched[3]),
+  };
+}
+
+function getRelativeLuminance({ r, g, b }) {
+  const channels = [r, g, b].map((value) => {
+    const normalized = value / 255;
+    return normalized <= 0.03928
+      ? normalized / 12.92
+      : ((normalized + 0.055) / 1.055) ** 2.4;
+  });
+
+  return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+}
+
+function detectLightSurfaceAtPoint(x, y) {
+  let element = document.elementFromPoint(x, y);
+
+  while (element) {
+    const { backgroundColor } = window.getComputedStyle(element);
+    const channels = parseColorChannels(backgroundColor);
+
+    if (channels && channels.a > 0.15) {
+      return getRelativeLuminance(channels) > 0.55;
+    }
+
+    element = element.parentElement;
+  }
+
+  return false;
+}
+
+function handlePointerMove(event) {
+  cursorX.value = event.clientX;
+  cursorY.value = event.clientY;
+  isCursorVisible.value = true;
+  isCursorOnLightSurface.value = detectLightSurfaceAtPoint(
+    event.clientX,
+    event.clientY,
+  );
+}
+
+function handlePointerDown() {
+  isCursorPressed.value = true;
+}
+
+function handlePointerUp() {
+  isCursorPressed.value = false;
+}
+
+function handlePointerLeave() {
+  isCursorVisible.value = false;
+  isCursorPressed.value = false;
+}
 
 onMounted(() => {
   timerId = window.setInterval(() => {
     taipeiNow.value = new Date();
   }, 1000);
+
+  canUseTouchCursor = window.matchMedia("(pointer: fine)").matches;
+
+  if (!canUseTouchCursor) {
+    return;
+  }
+
+  window.addEventListener("pointermove", handlePointerMove);
+  window.addEventListener("pointerdown", handlePointerDown);
+  window.addEventListener("pointerup", handlePointerUp);
+  window.addEventListener("pointerleave", handlePointerLeave);
 });
 
 onBeforeUnmount(() => {
   window.clearInterval(timerId);
+
+  if (!canUseTouchCursor) {
+    return;
+  }
+
+  window.removeEventListener("pointermove", handlePointerMove);
+  window.removeEventListener("pointerdown", handlePointerDown);
+  window.removeEventListener("pointerup", handlePointerUp);
+  window.removeEventListener("pointerleave", handlePointerLeave);
 });
 
 const dateFormatter = new Intl.DateTimeFormat("en-CA", {
@@ -249,6 +341,21 @@ function toggleLauncher() {
 
 <template>
   <main class="desktop">
+    <div
+      v-if="isCursorVisible"
+      class="touch-cursor"
+      :class="{
+        'touch-cursor--pressed': isCursorPressed,
+        'touch-cursor--dark': isCursorOnLightSurface,
+      }"
+      :style="{
+        transform: `translate(${cursorX}px, ${cursorY}px)`,
+      }"
+      aria-hidden="true"
+    >
+      <span class="touch-cursor__core"></span>
+    </div>
+
     <div
       class="desktop-art"
       :style="{ backgroundImage: `url(${rightPanelWallpaper})` }"
@@ -403,21 +510,25 @@ function toggleLauncher() {
 
           <div class="detail-window__body">
             <div class="markdown-slot">
-              <p># Hello, World</p>
-              <span
-                >This area can become your markdown-driven workspace for project
-                notes, product thinking, and lightweight documentation.</span
-              >
-              <span
-                >I enjoy building interfaces that feel calm, intentional, and a
-                little playful. This panel can be used for portfolio copy,
-                changelogs, meeting notes, or long-form writing.</span
-              >
-              <span>## What could live here</span>
-              <span
-                >- Project overview and goals<br />- Design decisions and
-                references<br />- Technical notes, todos, and next steps</span
-              >
+              <div class="markdown-copy">
+                <p># Under Construction</p>
+                <span
+                  >This space is being shaped into a cleaner portfolio
+                  workspace.</span
+                >
+                <span
+                  >Projects, notes, and experiments will land here soon with a
+                  calmer layout.</span
+                >
+                <span class="markdown-caption">WIP • UI refresh in progress</span>
+              </div>
+
+              <div class="markdown-visual" aria-hidden="true">
+                <img
+                  src="/under-construction.png"
+                  alt="Under construction neon sign"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -440,15 +551,113 @@ body {
   margin: 0;
 }
 
+@media (pointer: fine) {
+  body,
+  body * {
+    cursor: none !important;
+  }
+}
+
 button {
   font: inherit;
 }
 
 .desktop {
+  --workspace-left: 10px;
+  --workspace-right: 16px;
+  --workspace-gap: 22px;
+  --launcher-width: max(40%, 360px);
+  --right-pane-left: calc(
+    var(--workspace-left) + var(--launcher-width) + var(--workspace-gap)
+  );
+  --right-pane-width: calc(
+    100% - var(--right-pane-left) - var(--workspace-right)
+  );
   position: relative;
   min-height: 100vh;
   overflow: hidden;
   background: #020304;
+}
+
+.touch-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 20;
+  width: 28px;
+  height: 28px;
+  margin-left: -14px;
+  margin-top: -14px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.3);
+  background: rgba(255, 255, 255, 0.52);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.92) inset,
+    0 0 0 1.5px rgba(15, 23, 42, 0.14),
+    0 10px 28px rgba(15, 23, 42, 0.18),
+    0 0 0 6px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+  transition:
+    width 140ms ease,
+    height 140ms ease,
+    margin 140ms ease,
+    background 140ms ease,
+    box-shadow 140ms ease,
+    border-color 140ms ease;
+}
+
+.touch-cursor__core {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.58);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.44),
+    0 0 0 3px rgba(15, 23, 42, 0.08);
+}
+
+.touch-cursor--pressed {
+  width: 22px;
+  height: 22px;
+  margin-left: -11px;
+  margin-top: -11px;
+  background: rgba(255, 255, 255, 0.68);
+  border-color: rgba(15, 23, 42, 0.24);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.96) inset,
+    0 0 0 1.5px rgba(15, 23, 42, 0.12),
+    0 6px 18px rgba(15, 23, 42, 0.18),
+    0 0 0 4px rgba(255, 255, 255, 0.12);
+}
+
+.touch-cursor--dark {
+  border-color: rgba(255, 255, 255, 0.34);
+  background: rgba(15, 23, 42, 0.56);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+    0 0 0 1.5px rgba(15, 23, 42, 0.22),
+    0 10px 28px rgba(2, 6, 23, 0.28),
+    0 0 0 6px rgba(15, 23, 42, 0.08);
+}
+
+.touch-cursor--dark .touch-cursor__core {
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 0 0 2px rgba(15, 23, 42, 0.26),
+    0 0 0 3px rgba(255, 255, 255, 0.08);
+}
+
+.touch-cursor--dark.touch-cursor--pressed {
+  background: rgba(15, 23, 42, 0.72);
+  border-color: rgba(255, 255, 255, 0.42);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+    0 0 0 1.5px rgba(15, 23, 42, 0.18),
+    0 6px 18px rgba(2, 6, 23, 0.3),
+    0 0 0 4px rgba(15, 23, 42, 0.12);
 }
 
 .desktop::before,
@@ -459,15 +668,15 @@ button {
 .desktop-art {
   position: absolute;
   top: 128px;
-  right: 16px;
+  right: var(--workspace-right);
   bottom: 0;
-  left: calc(40% + 36px);
+  left: var(--right-pane-left);
   overflow: hidden;
   border-radius: 28px 28px 0 0;
   background-color: #020304;
   background-repeat: no-repeat;
-  background-size: auto 100%;
-  background-position: 62% bottom;
+  background-size: cover;
+  background-position: 58% 50%;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.04),
     0 24px 60px rgba(15, 23, 42, 0.18);
@@ -742,20 +951,27 @@ button {
   border-radius: 24px;
   background:
     linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.34) 0%,
+      rgba(255, 255, 255, 0.08) 34%,
+      rgba(255, 255, 255, 0.02) 100%
+    ),
+    linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.6),
-      rgba(244, 247, 251, 0.48)
+      rgba(255, 255, 255, 0.46),
+      rgba(244, 247, 251, 0.2)
     ),
     linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.36),
-      rgba(255, 255, 255, 0.12)
+      rgba(255, 255, 255, 0.16),
+      rgba(255, 255, 255, 0.04)
     );
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.72),
-    0 18px 34px rgba(15, 23, 42, 0.08);
-  backdrop-filter: blur(16px);
+    inset 0 1px 0 rgba(255, 255, 255, 0.68),
+    inset 0 18px 32px rgba(255, 255, 255, 0.1),
+    0 18px 34px rgba(15, 23, 42, 0.05);
+  backdrop-filter: blur(18px);
   opacity: 1;
   transform: translateY(0);
   transition:
@@ -769,13 +985,42 @@ button {
   inset: 0;
   border-radius: inherit;
   background:
+    linear-gradient(
+      120deg,
+      rgba(255, 255, 255, 0.52) 0%,
+      rgba(255, 255, 255, 0.14) 22%,
+      rgba(255, 255, 255, 0) 44%
+    ),
     radial-gradient(
-      circle at 18% 0%,
-      rgba(255, 255, 255, 0.72),
-      transparent 32%
+      circle at 16% 2%,
+      rgba(255, 255, 255, 0.56),
+      transparent 30%
     ),
     linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 34%);
   pointer-events: none;
+}
+
+.launcher-card::after {
+  content: "";
+  position: absolute;
+  top: -22%;
+  left: -48%;
+  width: 72%;
+  height: 160%;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.08) 24%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.08) 76%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(18deg);
+  opacity: 0.78;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: glass-sheen 6.4s ease-in-out infinite;
 }
 
 .launcher-card--secondary {
@@ -975,9 +1220,10 @@ button {
 }
 
 .markdown-slot {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(300px, 1.1fr);
+  align-items: center;
+  gap: 10px;
   min-height: 100%;
   margin-top: 0;
   border-radius: 0;
@@ -988,6 +1234,10 @@ button {
     rgba(7, 22, 39, 0.92)
   );
   padding: 32px;
+}
+
+.markdown-copy {
+  max-width: 360px;
 }
 
 .markdown-slot p,
@@ -1004,8 +1254,43 @@ button {
 .markdown-slot span {
   margin-top: 12px;
   color: #bfd3e3;
-  line-height: 1.7;
+  line-height: 1.6;
   font-size: 15px;
+  display: block;
+}
+
+.markdown-caption {
+  margin-top: 18px;
+  color: #f2d45c;
+  letter-spacing: 0.14em;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.markdown-visual {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.markdown-visual img {
+  width: min(100%, 780px);
+  height: auto;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 24px 50px rgba(255, 208, 0, 0.12));
+}
+
+@keyframes glass-sheen {
+  0%,
+  100% {
+    transform: translateX(0) rotate(18deg);
+    opacity: 0.24;
+  }
+
+  50% {
+    transform: translateX(126%) rotate(18deg);
+    opacity: 0.72;
+  }
 }
 
 @media (max-width: 1100px) {
@@ -1033,6 +1318,19 @@ button {
   .detail-window__frame {
     min-height: 540px;
     border-radius: 26px;
+  }
+
+  .markdown-slot {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .markdown-copy {
+    max-width: none;
+  }
+
+  .markdown-visual {
+    justify-content: center;
   }
 }
 
