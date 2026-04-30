@@ -1,7 +1,8 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
-// import rightPanelWallpaper from './assets/right-panel-wallpaper.png'
-import rightPanelWallpaper from "./assets/image.png";
+import bgDesktop from "./assets/bg-desktop.png";
+import bgMobile from "./assets/bg-mobile.png";
+import bgTablet from "./assets/bg-tablet.png";
 import profileAvatar from "./assets/profile-avatar.png";
 
 const pinnedApps = [
@@ -195,6 +196,7 @@ const userActions = [
 
 const selectedApp = ref(null);
 const isWindowOpen = ref(false);
+const isWindowClosing = ref(false);
 const isLauncherExpanded = ref(true);
 const taipeiNow = ref(new Date());
 const cursorX = ref(0);
@@ -205,6 +207,13 @@ const isCursorOnLightSurface = ref(false);
 
 let timerId;
 let canUseTouchCursor = false;
+let compactViewportQuery;
+
+function syncLauncherWithViewport(event) {
+  if (event.matches) {
+    isLauncherExpanded.value = false;
+  }
+}
 
 function parseColorChannels(color) {
   const matched = color.match(/[\d.]+/g);
@@ -277,6 +286,10 @@ onMounted(() => {
     taipeiNow.value = new Date();
   }, 1000);
 
+  compactViewportQuery = window.matchMedia("(max-width: 1100px)");
+  syncLauncherWithViewport(compactViewportQuery);
+  compactViewportQuery.addEventListener("change", syncLauncherWithViewport);
+
   canUseTouchCursor = window.matchMedia("(pointer: fine)").matches;
 
   if (!canUseTouchCursor) {
@@ -291,6 +304,8 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.clearInterval(timerId);
+
+  compactViewportQuery?.removeEventListener("change", syncLauncherWithViewport);
 
   if (!canUseTouchCursor) {
     return;
@@ -324,17 +339,47 @@ const formattedDate = computed(() =>
 const formattedTime = computed(() => timeFormatter.format(taipeiNow.value));
 
 function openWindow(app) {
+  isWindowClosing.value = false;
+
   if (selectedApp.value?.name === app.name && isWindowOpen.value) {
-    selectedApp.value = null;
-    isWindowOpen.value = false;
+    closeWindow();
     return;
   }
 
   selectedApp.value = app;
   isWindowOpen.value = true;
+
+  if (compactViewportQuery?.matches) {
+    isLauncherExpanded.value = false;
+  }
+}
+
+function closeWindow() {
+  isWindowClosing.value = compactViewportQuery?.matches ?? false;
+  isWindowOpen.value = false;
+  selectedApp.value = null;
+
+  if (compactViewportQuery?.matches) {
+    isLauncherExpanded.value = true;
+  }
+
+  window.requestAnimationFrame(() => {
+    isWindowClosing.value = false;
+  });
 }
 
 function toggleLauncher() {
+  if (compactViewportQuery?.matches && isWindowOpen.value) {
+    isWindowClosing.value = true;
+    isWindowOpen.value = false;
+    selectedApp.value = null;
+    isLauncherExpanded.value = true;
+    window.requestAnimationFrame(() => {
+      isWindowClosing.value = false;
+    });
+    return;
+  }
+
   isLauncherExpanded.value = !isLauncherExpanded.value;
 }
 </script>
@@ -358,7 +403,11 @@ function toggleLauncher() {
 
     <div
       class="desktop-art"
-      :style="{ backgroundImage: `url(${rightPanelWallpaper})` }"
+      :style="{
+        '--art-image-desktop': `url(${bgDesktop})`,
+        '--art-image-tablet': `url(${bgTablet})`,
+        '--art-image-mobile': `url(${bgMobile})`,
+      }"
       aria-hidden="true"
     >
       <div class="desktop-art__dots"></div>
@@ -386,10 +435,13 @@ function toggleLauncher() {
       <p class="clock-panel__zone">UTC+8 Taipei</p>
     </section>
 
-    <section class="workspace">
+    <section class="workspace" :class="{ 'workspace--detail-open': isWindowOpen }">
       <aside
         class="launcher"
-        :class="{ 'launcher--collapsed': !isLauncherExpanded }"
+        :class="{
+          'launcher--collapsed': !isLauncherExpanded,
+          'launcher--mobile-peek': isWindowOpen,
+        }"
       >
         <div class="launcher-shell">
           <div class="profile-strip">
@@ -482,7 +534,10 @@ function toggleLauncher() {
 
       <section
         class="detail-window"
-        :class="{ 'detail-window--open': isWindowOpen }"
+        :class="{
+          'detail-window--open': isWindowOpen,
+          'detail-window--closing': isWindowClosing,
+        }"
       >
         <div class="detail-window__frame">
           <div class="detail-window__bar">
@@ -500,7 +555,7 @@ function toggleLauncher() {
             </div>
 
             <div class="detail-window__controls">
-              <button @click="isWindowOpen = false" aria-label="Close window">
+              <button @click="closeWindow" aria-label="Close window">
                 <span class="traffic-dot traffic-dot--close"></span>
                 <span class="traffic-dot traffic-dot--minimize"></span>
                 <span class="traffic-dot traffic-dot--zoom"></span>
@@ -674,9 +729,10 @@ button {
   overflow: hidden;
   border-radius: 28px 28px 0 0;
   background-color: #020304;
+  background-image: var(--art-image-desktop);
   background-repeat: no-repeat;
   background-size: cover;
-  background-position: 58% 50%;
+  background-position: center;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.04),
     0 24px 60px rgba(15, 23, 42, 0.18);
@@ -734,6 +790,7 @@ button {
 }
 
 .launcher {
+  --desktop-collapsed-peek: 166px;
   position: relative;
   align-self: flex-start;
   z-index: 1;
@@ -784,7 +841,7 @@ button {
 }
 
 .launcher--collapsed .launcher-shell {
-  transform: translateY(calc(100% - 136px));
+  transform: translateY(calc(100% - var(--desktop-collapsed-peek)));
 }
 
 .launcher--collapsed .launcher-shell::before {
@@ -922,11 +979,13 @@ button {
 
 .launcher__body {
   flex: 1 1 auto;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   max-height: 1000px;
   padding: 24px 24px 28px;
   opacity: 1;
   transform: translateY(0);
+  -webkit-overflow-scrolling: touch;
   transition:
     max-height 0.6s ease,
     opacity 0.6s ease,
@@ -947,6 +1006,7 @@ button {
 
 .launcher-card {
   position: relative;
+  overflow: hidden;
   padding: 22px 20px 24px;
   border-radius: 24px;
   background:
@@ -1216,7 +1276,10 @@ button {
 
 .detail-window__body {
   height: calc(100% - 75px);
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 0;
+  -webkit-overflow-scrolling: touch;
 }
 
 .markdown-slot {
@@ -1294,35 +1357,226 @@ button {
 }
 
 @media (max-width: 1100px) {
+  .desktop {
+    --compact-side: 10px;
+    --compact-top: 112px;
+    --compact-bottom-bar: 126px;
+    --compact-drawer-gap: 10px;
+    --compact-expanded-height: calc(100vh - var(--compact-top) - 12px);
+    --compact-expanded-top: calc(100vh - var(--compact-expanded-height));
+    height: 100vh;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  .clock-panel {
+    top: 18px;
+    right: 18px;
+    z-index: 8;
+  }
+
+  .desktop-art {
+    position: absolute;
+    top: var(--compact-top);
+    right: var(--compact-side);
+    bottom: 0;
+    left: var(--compact-side);
+    height: auto;
+    margin: 0;
+    border-radius: 26px;
+    background-image: var(--art-image-tablet);
+    background-size: cover;
+    background-position: center;
+  }
+
   .workspace {
-    flex-direction: column;
-    padding-right: 10px;
+    position: absolute;
+    inset: 0;
+    display: block;
+    min-height: 0;
+    padding: 0;
   }
 
   .launcher,
   .detail-window {
-    width: 100%;
+    width: auto;
     min-width: 0;
-    height: auto;
   }
 
-  .detail-window {
-    position: relative;
-    top: auto;
-    left: auto;
-    opacity: 1;
+  .launcher {
+    position: absolute;
+    right: var(--compact-side);
+    bottom: 0;
+    left: var(--compact-side);
+    z-index: 6;
+    overflow: hidden;
+    height: var(--compact-expanded-height);
+  }
+
+  .workspace--detail-open .launcher {
+    height: var(--compact-bottom-bar);
+  }
+
+  .launcher-shell {
+    flex-direction: column;
+    height: 100%;
+    max-height: none;
+    overflow-x: hidden;
+    background: #ffffff;
+    border-radius: 28px 28px 0 0;
+    transform: translateY(calc(100% - var(--compact-bottom-bar)));
+    box-shadow:
+      0 -18px 46px rgba(2, 12, 24, 0.22),
+      0 -1px 0 rgba(255, 255, 255, 0.86) inset,
+      0 0 0 1px rgba(226, 232, 240, 0.72);
+  }
+
+  .launcher-shell::before {
+    inset: 0;
+  }
+
+  .launcher--collapsed .launcher-shell,
+  .workspace--detail-open .launcher .launcher-shell {
+    transform: translateY(calc(100% - var(--compact-bottom-bar)));
+  }
+
+  .launcher:not(.launcher--collapsed) .launcher-shell {
     transform: none;
+  }
+
+  .profile-strip {
+    padding: 30px 20px 22px;
+    border-bottom: 1px solid #e2e8f0;
+    border-radius: 28px 28px 0 0;
+    box-shadow: none;
+  }
+
+  .profile {
+    gap: 16px;
+    font-size: 13px;
+  }
+
+  .profile__avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 17px;
+  }
+
+  .profile__meta strong {
+    font-size: 18px;
+  }
+
+  .profile__meta span {
+    margin-top: 3px;
+    font-size: 12px;
+  }
+
+  .profile-actions {
+    gap: 10px;
+  }
+
+  .profile-actions button {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    font-size: 13px;
+  }
+
+  .launcher-toggle {
+    top: -1px;
+    width: 68px;
+    height: 38px;
+    background: linear-gradient(180deg, #ffffff, #f7f9fc);
+    box-shadow:
+      0 14px 28px rgba(15, 23, 42, 0.08),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.86);
+  }
+
+  .launcher-toggle__disclosure {
+    width: 16px;
+    height: 16px;
+    border-right-width: 3px;
+    border-bottom-width: 3px;
+  }
+
+  .launcher__body {
+    flex: 1 1 auto;
+    max-height: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 18px 18px 22px;
+    opacity: 0;
+    transform: translateY(28px);
+    pointer-events: none;
+  }
+
+  .launcher:not(.launcher--collapsed) .launcher__body {
+    opacity: 1;
+    transform: translateY(0);
     pointer-events: auto;
   }
 
+  .workspace--detail-open .launcher .launcher__body {
+    opacity: 0;
+    transform: translateY(28px);
+    pointer-events: none;
+  }
+
+  .launcher--collapsed .launcher-toggle__disclosure {
+    transform: rotate(225deg) translate(-1px, -1px);
+  }
+
+  .launcher:not(.launcher--collapsed) .launcher-toggle__disclosure {
+    transform: rotate(45deg) translate(-1px, -2px);
+  }
+
+  .detail-window {
+    position: absolute;
+    top: var(--compact-expanded-top);
+    right: var(--compact-side);
+    bottom: calc(var(--compact-bottom-bar) + var(--compact-drawer-gap));
+    left: var(--compact-side);
+    z-index: 7;
+    height: auto;
+    margin: 0;
+    opacity: 0;
+    transform: translateY(14px);
+    transition:
+      opacity 360ms ease,
+      transform 420ms ease;
+    pointer-events: none;
+  }
+
   .detail-window__frame {
-    min-height: 540px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
     border-radius: 26px;
+  }
+
+  .detail-window__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .detail-window--open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .detail-window--closing {
+    transition: none;
   }
 
   .markdown-slot {
     grid-template-columns: 1fr;
     align-items: start;
+    min-height: 100%;
   }
 
   .markdown-copy {
@@ -1335,25 +1589,77 @@ button {
 }
 
 @media (max-width: 720px) {
-  .workspace {
-    padding-top: 148px;
+  .desktop-art {
+    top: var(--compact-top);
+    background-image: var(--art-image-mobile);
+    background-position: center;
+  }
+
+  .desktop {
+    --compact-side: 12px;
+    --compact-top: 106px;
+    --compact-bottom-bar: 112px;
+    --compact-drawer-gap: 8px;
+    --compact-expanded-height: calc(100vh - var(--compact-top) - 12px);
   }
 
   .clock-panel {
     right: 18px;
   }
 
-  .desktop-art {
-    top: 148px;
-    right: 12px;
-    left: 12px;
-    background-size: cover;
-    background-position: 60% 42%;
-  }
-
   .clock-panel__time {
     font-size: 42px;
     letter-spacing: 5px;
+  }
+
+  .profile-strip {
+    padding: 28px 16px 20px;
+  }
+
+  .profile {
+    gap: 12px;
+  }
+
+  .profile__avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 15px;
+  }
+
+  .profile__meta strong {
+    font-size: 16px;
+  }
+
+  .profile__meta span {
+    font-size: 11px;
+  }
+
+  .profile-actions {
+    gap: 8px;
+  }
+
+  .profile-actions button {
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    font-size: 12px;
+  }
+
+  .launcher-toggle {
+    width: 58px;
+    height: 32px;
+    border-radius: 0 0 18px 18px;
+  }
+
+  .launcher-toggle__disclosure {
+    width: 13px;
+    height: 13px;
+    border-right-width: 3px;
+    border-bottom-width: 3px;
+  }
+
+  .markdown-slot {
+    padding: 22px 18px 26px;
   }
 
   .pinned-grid,
