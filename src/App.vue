@@ -1,9 +1,11 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
-import bgDesktop from "./assets/bg-desktop.png";
-import bgMobile from "./assets/bg-mobile.png";
-import bgTablet from "./assets/bg-tablet.png";
-import profileAvatar from "./assets/profile-avatar.png";
+import bgDesktop from "./assets/bg-desktop.webp";
+import bgMobile from "./assets/bg-mobile.webp";
+import bgTablet from "./assets/bg-tablet.webp";
+import bgTabletLandscape from "./assets/bg-tablet-landscape.webp";
+import profileAvatar from "./assets/profile-avatar.webp";
+import underConstruction from "./assets/under-construction.webp";
 
 const pinnedApps = [
   {
@@ -286,7 +288,9 @@ onMounted(() => {
     taipeiNow.value = new Date();
   }, 1000);
 
-  compactViewportQuery = window.matchMedia("(max-width: 1100px)");
+  compactViewportQuery = window.matchMedia(
+    "(max-width: 720px), (max-width: 1100px) and (orientation: portrait)",
+  );
   syncLauncherWithViewport(compactViewportQuery);
   compactViewportQuery.addEventListener("change", syncLauncherWithViewport);
 
@@ -385,7 +389,15 @@ function toggleLauncher() {
 </script>
 
 <template>
-  <main class="desktop">
+  <main
+    class="desktop"
+    :style="{
+      '--art-image-desktop': `url(${bgDesktop})`,
+      '--art-image-tablet': `url(${bgTablet})`,
+      '--art-image-tablet-landscape': `url(${bgTabletLandscape})`,
+      '--art-image-mobile': `url(${bgMobile})`,
+    }"
+  >
     <div
       v-if="isCursorVisible"
       class="touch-cursor"
@@ -401,15 +413,7 @@ function toggleLauncher() {
       <span class="touch-cursor__core"></span>
     </div>
 
-    <div
-      class="desktop-art"
-      :style="{
-        '--art-image-desktop': `url(${bgDesktop})`,
-        '--art-image-tablet': `url(${bgTablet})`,
-        '--art-image-mobile': `url(${bgMobile})`,
-      }"
-      aria-hidden="true"
-    >
+    <div class="desktop-art" aria-hidden="true">
       <div class="desktop-art__dots"></div>
       <div class="desktop-art__hero">
         <div class="desktop-art__marks">
@@ -580,7 +584,7 @@ function toggleLauncher() {
 
               <div class="markdown-visual" aria-hidden="true">
                 <img
-                  src="/under-construction.png"
+                  :src="underConstruction"
                   alt="Under construction neon sign"
                 />
               </div>
@@ -596,6 +600,7 @@ function toggleLauncher() {
 :root {
   font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   color: #e5eef7;
+  background: #020304;
 }
 
 * {
@@ -604,6 +609,20 @@ function toggleLauncher() {
 
 body {
   margin: 0;
+}
+
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+body {
+  overflow: hidden;
+  background: #020304;
 }
 
 @media (pointer: fine) {
@@ -618,6 +637,7 @@ button {
 }
 
 .desktop {
+  --viewport-height: 100vh;
   --workspace-left: 10px;
   --workspace-right: 16px;
   --workspace-gap: 22px;
@@ -629,9 +649,36 @@ button {
     100% - var(--right-pane-left) - var(--workspace-right)
   );
   position: relative;
-  min-height: 100vh;
+  width: 100vw;
+  height: var(--viewport-height);
+  min-height: 0;
   overflow: hidden;
-  background: #020304;
+  background-color: #020304;
+  background-image: var(--art-image-desktop);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: 0 0;
+}
+
+@supports (height: 100svh) {
+  .desktop {
+    --viewport-height: 100svh;
+  }
+}
+
+@supports (height: 100dvh) {
+  .desktop {
+    --viewport-height: 100dvh;
+  }
+}
+
+@media (min-width: 721px) and (max-width: 1180px) and (orientation: landscape),
+  (min-width: 1181px) and (max-width: 1366px) and (min-height: 900px) and (orientation: landscape) {
+  .desktop {
+    background-image: var(--art-image-tablet-landscape);
+    background-size: cover;
+    background-position: 0 0;
+  }
 }
 
 .touch-cursor {
@@ -721,21 +768,7 @@ button {
 }
 
 .desktop-art {
-  position: absolute;
-  top: 128px;
-  right: var(--workspace-right);
-  bottom: 0;
-  left: var(--right-pane-left);
-  overflow: hidden;
-  border-radius: 28px 28px 0 0;
-  background-color: #020304;
-  background-image: var(--art-image-desktop);
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    0 24px 60px rgba(15, 23, 42, 0.18);
+  display: none;
 }
 
 .desktop-art > * {
@@ -780,13 +813,13 @@ button {
   display: flex;
   align-items: stretch;
   gap: 22px;
-  min-height: calc(100vh - 128px);
+  min-height: calc(var(--viewport-height) - 128px);
   padding: 128px 16px 0 10px;
 }
 
 .launcher,
 .detail-window {
-  height: calc(100vh - 128px);
+  height: calc(var(--viewport-height) - 128px);
 }
 
 .launcher {
@@ -1356,16 +1389,20 @@ button {
   }
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 720px), (max-width: 1100px) and (orientation: portrait) {
   .desktop {
     --compact-side: 10px;
-    --compact-top: 112px;
+    --compact-top: 148px;
     --compact-bottom-bar: 126px;
     --compact-drawer-gap: 10px;
-    --compact-expanded-height: calc(100vh - var(--compact-top) - 12px);
-    --compact-expanded-top: calc(100vh - var(--compact-expanded-height));
-    height: 100vh;
-    min-height: 100vh;
+    --compact-expanded-height: calc(
+      var(--viewport-height) - var(--compact-top) - 12px
+    );
+    --compact-expanded-top: calc(
+      var(--viewport-height) - var(--compact-expanded-height)
+    );
+    height: var(--viewport-height);
+    min-height: 0;
     overflow: hidden;
   }
 
@@ -1375,18 +1412,10 @@ button {
     z-index: 8;
   }
 
-  .desktop-art {
-    position: absolute;
-    top: var(--compact-top);
-    right: var(--compact-side);
-    bottom: 0;
-    left: var(--compact-side);
-    height: auto;
-    margin: 0;
-    border-radius: 26px;
+  .desktop {
     background-image: var(--art-image-tablet);
     background-size: cover;
-    background-position: center;
+    background-position: 0 0;
   }
 
   .workspace {
@@ -1588,19 +1617,18 @@ button {
   }
 }
 
-@media (max-width: 720px) {
-  .desktop-art {
-    top: var(--compact-top);
-    background-image: var(--art-image-mobile);
-    background-position: center;
-  }
-
+@media (max-width: 720px), (max-width: 920px) and (max-aspect-ratio: 9 / 16) {
   .desktop {
     --compact-side: 12px;
     --compact-top: 106px;
     --compact-bottom-bar: 112px;
     --compact-drawer-gap: 8px;
-    --compact-expanded-height: calc(100vh - var(--compact-top) - 12px);
+    --compact-expanded-height: calc(
+      var(--viewport-height) - var(--compact-top) - 12px
+    );
+    background-image: var(--art-image-mobile);
+    background-size: cover;
+    background-position: 0 0;
   }
 
   .clock-panel {
@@ -1665,6 +1693,16 @@ button {
   .pinned-grid,
   .recommended-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) and (min-aspect-ratio: 3 / 4) and (orientation: portrait) {
+  .desktop {
+    --compact-side: 10px;
+    --compact-top: 148px;
+    --compact-bottom-bar: 126px;
+    --compact-drawer-gap: 10px;
+    background-image: var(--art-image-tablet);
   }
 }
 </style>
