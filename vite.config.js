@@ -2,6 +2,10 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 
 function resolveBase() {
+  if (process.env.CF_PAGES) {
+    return "/";
+  }
+
   const repository = process.env.GITHUB_REPOSITORY?.split("/")[1] || "";
 
   if (!repository || repository.endsWith(".github.io")) {
