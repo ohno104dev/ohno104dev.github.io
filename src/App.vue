@@ -4,8 +4,8 @@ import bgDesktop from "./assets/bg-desktop.webp";
 import bgMobile from "./assets/bg-mobile.webp";
 import bgTablet from "./assets/bg-tablet.webp";
 import bgTabletLandscape from "./assets/bg-tablet-landscape.webp";
+import underConstructionContent from "./content/under-construction.html?raw";
 import profileAvatar from "./assets/profile-avatar.webp";
-import underConstruction from "./assets/under-construction.webp";
 
 const pinnedApps = [
   {
@@ -13,6 +13,7 @@ const pinnedApps = [
     badge: "E",
     color: "linear-gradient(135deg, #52c8ff, #2f74ff)",
     detailTitle: "Browser Workspace",
+    contentHtml: underConstructionContent,
     detailBody:
       "Use the right-side window to show web previews, tabs, and browsing context without overlapping the live Taipei clock.",
   },
@@ -21,6 +22,7 @@ const pinnedApps = [
     badge: "W",
     color: "linear-gradient(135deg, #275efe, #2c3e9f)",
     detailTitle: "Document Workspace",
+    contentHtml: underConstructionContent,
     detailBody:
       "A focused reading and editing surface for reports, specs, and shared notes.",
   },
@@ -29,6 +31,7 @@ const pinnedApps = [
     badge: "X",
     color: "linear-gradient(135deg, #36c275, #0a7847)",
     detailTitle: "Spreadsheet Workspace",
+    contentHtml: underConstructionContent,
     detailBody:
       "Charts, budgets, and tabular summaries can live in this main window area.",
   },
@@ -37,6 +40,7 @@ const pinnedApps = [
     badge: "P",
     color: "linear-gradient(135deg, #ff7d4a, #ca4427)",
     detailTitle: "Presentation Workspace",
+    contentHtml: underConstructionContent,
     detailBody:
       "A large stage for slides, layout review, and presenter materials.",
   },
@@ -45,6 +49,7 @@ const pinnedApps = [
     badge: "O",
     color: "linear-gradient(135deg, #0095ff, #1458d4)",
     detailTitle: "Communication Workspace",
+    contentHtml: underConstructionContent,
     detailBody:
       "Pin your inbox, meeting agenda, or follow-up tasks on the right.",
   },
@@ -53,6 +58,7 @@ const pinnedApps = [
     badge: "S",
     color: "linear-gradient(135deg, #18c8ff, #0078d4)",
     detailTitle: "Store Workspace",
+    contentHtml: underConstructionContent,
     detailBody:
       "Show application listings, updates, and downloads in the content panel.",
   },
@@ -61,6 +67,7 @@ const pinnedApps = [
     badge: "G",
     color: "linear-gradient(135deg, #9099aa, #667085)",
     detailTitle: "Settings Workspace",
+    contentHtml: underConstructionContent,
     detailBody:
       "A neutral control surface for preferences, connectivity, and account settings.",
   },
@@ -69,6 +76,7 @@ const pinnedApps = [
     badge: "P",
     color: "linear-gradient(135deg, #4c95ff, #2a5fbf)",
     detailTitle: "Media Workspace",
+    contentHtml: underConstructionContent,
     detailBody:
       "A larger preview region for image browsing, galleries, and asset details.",
   },
@@ -77,6 +85,7 @@ const pinnedApps = [
     badge: "X",
     color: "linear-gradient(135deg, #69d24a, #179b3e)",
     detailTitle: "Gaming Workspace",
+    contentHtml: underConstructionContent,
     detailBody:
       "Use the window for library highlights, updates, and launch actions.",
   },
@@ -85,6 +94,7 @@ const pinnedApps = [
     badge: "S",
     color: "linear-gradient(135deg, #59b8ff, #1d83cf)",
     detailTitle: "Casual Workspace",
+    contentHtml: underConstructionContent,
     detailBody:
       "A relaxed content view for games, scoreboards, and quick previews.",
   },
@@ -93,6 +103,7 @@ const pinnedApps = [
     badge: "P",
     color: "linear-gradient(135deg, #65d8c2, #4198ff)",
     detailTitle: "Canvas Workspace",
+    contentHtml: underConstructionContent,
     detailBody:
       "A drawing and asset sketching surface with room for larger previews.",
   },
@@ -101,6 +112,7 @@ const pinnedApps = [
     badge: "in",
     color: "linear-gradient(135deg, #3e8cff, #0a66c2)",
     detailTitle: "Network Workspace",
+    contentHtml: underConstructionContent,
     detailBody:
       "Profiles, hiring notes, and networking activity can appear here.",
   },
@@ -109,6 +121,7 @@ const pinnedApps = [
     badge: "C",
     color: "linear-gradient(135deg, #7da9ff, #425dcb)",
     detailTitle: "Utility Workspace",
+    contentHtml: underConstructionContent,
     detailBody:
       "A compact utility view for quick calculations and small tools.",
   },
@@ -117,6 +130,7 @@ const pinnedApps = [
     badge: "K",
     color: "linear-gradient(135deg, #f3f4f6, #d0d5dd)",
     detailTitle: "Time Workspace",
+    contentHtml: underConstructionContent,
     detailBody:
       "Secondary clocks, timers, and scheduling helpers can render in this area.",
   },
@@ -125,6 +139,7 @@ const pinnedApps = [
     badge: "N",
     color: "linear-gradient(135deg, #5ed0e6, #2488b6)",
     detailTitle: "Notes Workspace",
+    contentHtml: underConstructionContent,
     detailBody:
       "Quick notes and scratch text can open in the large right-side window.",
   },
@@ -133,6 +148,7 @@ const pinnedApps = [
     badge: "T",
     color: "linear-gradient(135deg, #ffb86c, #ff7a59)",
     detailTitle: "Capture Workspace",
+    contentHtml: underConstructionContent,
     detailBody:
       "Previews, crops, and screenshot history fit naturally in this panel.",
   },
@@ -144,6 +160,7 @@ const recommendedItems = [
     badge: "G",
     color: "linear-gradient(135deg, #37c28d, #178b64)",
     detailTitle: "Writing Workspace",
+    contentHtml: underConstructionContent,
     detailBody:
       "A focused side window for polished drafts, edits, and AI writing support.",
   },
@@ -152,6 +169,7 @@ const recommendedItems = [
     badge: "W",
     color: "linear-gradient(135deg, #275efe, #2c3e9f)",
     detailTitle: "Reading Notes",
+    contentHtml: underConstructionContent,
     detailBody:
       "Use this panel for summaries, reading highlights, and document annotations.",
   },
@@ -160,6 +178,7 @@ const recommendedItems = [
     badge: "X",
     color: "linear-gradient(135deg, #36c275, #0a7847)",
     detailTitle: "Budget Workspace",
+    contentHtml: underConstructionContent,
     detailBody:
       "A clean area for forecasts, estimates, and lightweight financial planning.",
   },
@@ -168,6 +187,7 @@ const recommendedItems = [
     badge: "X",
     color: "linear-gradient(135deg, #36c275, #0a7847)",
     detailTitle: "Planning Workspace",
+    contentHtml: underConstructionContent,
     detailBody:
       "Review manufacturing impacts, planning notes, and quick operational summaries.",
   },
@@ -176,6 +196,7 @@ const recommendedItems = [
     badge: "F",
     color: "linear-gradient(135deg, #b859ff, #ff5f6d)",
     detailTitle: "Design Workspace",
+    contentHtml: underConstructionContent,
     detailBody:
       "A presentation area for interface drafts, component explorations, and design handoff.",
   },
@@ -184,6 +205,7 @@ const recommendedItems = [
     badge: "P",
     color: "linear-gradient(135deg, #ff7d4a, #ca4427)",
     detailTitle: "Concept Workspace",
+    contentHtml: underConstructionContent,
     detailBody:
       "Keep moodboards, concept notes, and visual directions visible on the right.",
   },
@@ -568,27 +590,7 @@ function toggleLauncher() {
           </div>
 
           <div class="detail-window__body">
-            <div class="markdown-slot">
-              <div class="markdown-copy">
-                <p># Under Construction</p>
-                <span
-                  >This space is being shaped into a cleaner portfolio
-                  workspace.</span
-                >
-                <span
-                  >Projects, notes, and experiments will land here soon with a
-                  calmer layout.</span
-                >
-                <span class="markdown-caption">WIP • UI refresh in progress</span>
-              </div>
-
-              <div class="markdown-visual" aria-hidden="true">
-                <img
-                  :src="underConstruction"
-                  alt="Under construction neon sign"
-                />
-              </div>
-            </div>
+            <div class="markdown-slot" v-html="selectedApp?.contentHtml"></div>
           </div>
         </div>
       </section>
