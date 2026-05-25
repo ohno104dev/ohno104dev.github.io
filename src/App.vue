@@ -1,221 +1,177 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import "./content/about-me.css";
+import "./content/web3.css";
 import bgDesktop from "./assets/bg-desktop.png";
 import bgMobile from "./assets/bg-mobile.png";
 import bgTablet from "./assets/bg-tablet.png";
 import bgTabletLandscape from "./assets/bg-tablet-landscape.png";
+import aboutMeContent from "./content/about-me.html?raw";
 import underConstructionContent from "./content/under-construction.html?raw";
+import web3Content from "./content/web3.html?raw";
 import profileAvatar from "./assets/profile-avatar.webp";
 
-const pinnedApps = [
+const profileItem = {
+  name: "Felix Huang",
+  badge: "F",
+  color: "linear-gradient(135deg, #111827, #475569)",
+  detailTitle: "About Me",
+  contentHtml: aboutMeContent,
+  iconImage: profileAvatar,
+};
+
+function createGradientFromName(name) {
+  const hue = [...name].reduce(
+    (hash, character) => hash + character.charCodeAt(0),
+    0,
+  ) % 360;
+  const secondaryHue = (hue + 42) % 360;
+
+  return `linear-gradient(135deg, hsl(${hue} 82% 62%), hsl(${secondaryHue} 78% 43%))`;
+}
+
+function withGeneratedColor(item) {
+  return {
+    ...item,
+    color: createGradientFromName(item.name),
+  };
+}
+
+const pinnedProject = [
   {
     name: "Edge",
     badge: "E",
-    color: "linear-gradient(135deg, #52c8ff, #2f74ff)",
     detailTitle: "Browser Workspace",
     contentHtml: underConstructionContent,
-    detailBody:
-      "Use the right-side window to show web previews, tabs, and browsing context without overlapping the live Taipei clock.",
   },
   {
     name: "Word",
     badge: "W",
-    color: "linear-gradient(135deg, #275efe, #2c3e9f)",
     detailTitle: "Document Workspace",
     contentHtml: underConstructionContent,
-    detailBody:
-      "A focused reading and editing surface for reports, specs, and shared notes.",
   },
   {
     name: "Excel",
     badge: "X",
-    color: "linear-gradient(135deg, #36c275, #0a7847)",
     detailTitle: "Spreadsheet Workspace",
     contentHtml: underConstructionContent,
-    detailBody:
-      "Charts, budgets, and tabular summaries can live in this main window area.",
   },
   {
     name: "PowerPoint",
     badge: "P",
-    color: "linear-gradient(135deg, #ff7d4a, #ca4427)",
     detailTitle: "Presentation Workspace",
     contentHtml: underConstructionContent,
-    detailBody:
-      "A large stage for slides, layout review, and presenter materials.",
   },
   {
     name: "Outlook",
     badge: "O",
-    color: "linear-gradient(135deg, #0095ff, #1458d4)",
     detailTitle: "Communication Workspace",
     contentHtml: underConstructionContent,
-    detailBody:
-      "Pin your inbox, meeting agenda, or follow-up tasks on the right.",
   },
   {
     name: "Store",
     badge: "S",
-    color: "linear-gradient(135deg, #18c8ff, #0078d4)",
     detailTitle: "Store Workspace",
     contentHtml: underConstructionContent,
-    detailBody:
-      "Show application listings, updates, and downloads in the content panel.",
   },
   {
     name: "Settings",
     badge: "G",
-    color: "linear-gradient(135deg, #9099aa, #667085)",
     detailTitle: "Settings Workspace",
     contentHtml: underConstructionContent,
-    detailBody:
-      "A neutral control surface for preferences, connectivity, and account settings.",
   },
   {
     name: "Photos",
     badge: "P",
-    color: "linear-gradient(135deg, #4c95ff, #2a5fbf)",
     detailTitle: "Media Workspace",
     contentHtml: underConstructionContent,
-    detailBody:
-      "A larger preview region for image browsing, galleries, and asset details.",
   },
   {
     name: "Xbox",
     badge: "X",
-    color: "linear-gradient(135deg, #69d24a, #179b3e)",
     detailTitle: "Gaming Workspace",
     contentHtml: underConstructionContent,
-    detailBody:
-      "Use the window for library highlights, updates, and launch actions.",
   },
-  {
-    name: "Solitaire",
-    badge: "S",
-    color: "linear-gradient(135deg, #59b8ff, #1d83cf)",
-    detailTitle: "Casual Workspace",
-    contentHtml: underConstructionContent,
-    detailBody:
-      "A relaxed content view for games, scoreboards, and quick previews.",
-  },
-  {
-    name: "Paint",
-    badge: "P",
-    color: "linear-gradient(135deg, #65d8c2, #4198ff)",
-    detailTitle: "Canvas Workspace",
-    contentHtml: underConstructionContent,
-    detailBody:
-      "A drawing and asset sketching surface with room for larger previews.",
-  },
-  {
-    name: "LinkedIn",
-    badge: "in",
-    color: "linear-gradient(135deg, #3e8cff, #0a66c2)",
-    detailTitle: "Network Workspace",
-    contentHtml: underConstructionContent,
-    detailBody:
-      "Profiles, hiring notes, and networking activity can appear here.",
-  },
-  {
-    name: "Calculator",
-    badge: "C",
-    color: "linear-gradient(135deg, #7da9ff, #425dcb)",
-    detailTitle: "Utility Workspace",
-    contentHtml: underConstructionContent,
-    detailBody:
-      "A compact utility view for quick calculations and small tools.",
-  },
-  {
-    name: "Clock",
-    badge: "K",
-    color: "linear-gradient(135deg, #f3f4f6, #d0d5dd)",
-    detailTitle: "Time Workspace",
-    contentHtml: underConstructionContent,
-    detailBody:
-      "Secondary clocks, timers, and scheduling helpers can render in this area.",
-  },
-  {
-    name: "Notepad",
-    badge: "N",
-    color: "linear-gradient(135deg, #5ed0e6, #2488b6)",
-    detailTitle: "Notes Workspace",
-    contentHtml: underConstructionContent,
-    detailBody:
-      "Quick notes and scratch text can open in the large right-side window.",
-  },
-  {
-    name: "Snipping Tool",
-    badge: "T",
-    color: "linear-gradient(135deg, #ffb86c, #ff7a59)",
-    detailTitle: "Capture Workspace",
-    contentHtml: underConstructionContent,
-    detailBody:
-      "Previews, crops, and screenshot history fit naturally in this panel.",
-  },
-];
+].slice(0, 6).map(withGeneratedColor);
 
-const recommendedItems = [
+const pinnedGame = [
   {
     name: "Grammarly",
     badge: "G",
-    color: "linear-gradient(135deg, #37c28d, #178b64)",
     detailTitle: "Writing Workspace",
     contentHtml: underConstructionContent,
-    detailBody:
-      "A focused side window for polished drafts, edits, and AI writing support.",
   },
   {
     name: "Book Report",
     badge: "W",
-    color: "linear-gradient(135deg, #275efe, #2c3e9f)",
     detailTitle: "Reading Notes",
     contentHtml: underConstructionContent,
-    detailBody:
-      "Use this panel for summaries, reading highlights, and document annotations.",
   },
   {
     name: "Budget Estimate",
     badge: "X",
-    color: "linear-gradient(135deg, #36c275, #0a7847)",
     detailTitle: "Budget Workspace",
     contentHtml: underConstructionContent,
-    detailBody:
-      "A clean area for forecasts, estimates, and lightweight financial planning.",
   },
   {
     name: "MRP Impact",
     badge: "X",
-    color: "linear-gradient(135deg, #36c275, #0a7847)",
     detailTitle: "Planning Workspace",
     contentHtml: underConstructionContent,
-    detailBody:
-      "Review manufacturing impacts, planning notes, and quick operational summaries.",
   },
   {
     name: "Figma",
     badge: "F",
-    color: "linear-gradient(135deg, #b859ff, #ff5f6d)",
     detailTitle: "Design Workspace",
     contentHtml: underConstructionContent,
-    detailBody:
-      "A presentation area for interface drafts, component explorations, and design handoff.",
   },
   {
     name: "Design Concepts",
     badge: "P",
-    color: "linear-gradient(135deg, #ff7d4a, #ca4427)",
     detailTitle: "Concept Workspace",
     contentHtml: underConstructionContent,
-    detailBody:
-      "Keep moodboards, concept notes, and visual directions visible on the right.",
   },
-];
+].slice(0, 3).map(withGeneratedColor);
+
+const pinnedBlockchain = [
+  {
+    name: "Web3",
+    badge: "W",
+    detailTitle: "Web3 pages",
+    contentHtml: web3Content,
+  },
+  {
+    name: "Ethereum",
+    badge: "E",
+    detailTitle: "Smart Contract Workspace",
+    contentHtml: underConstructionContent,
+  },
+  {
+    name: "Solana",
+    badge: "S",
+    detailTitle: "Web3 Workspace",
+    contentHtml: underConstructionContent,
+  },
+].map(withGeneratedColor);
 
 const userActions = [
-  { label: "Profile", icon: "D" },
-  { label: "LinkedIn", icon: "in" },
-  { label: "GitHub", icon: "GH" },
-  { label: "Email", icon: "@" },
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/in/hello-felixhuang",
+    iconSrc: "/icon/linkedin.svg",
+    target: "_blank",
+  },
+  {
+    label: "GitHub",
+    href: "https://github.com/ohno104dev",
+    iconSrc: "/icon/github.svg",
+    target: "_blank",
+  },
+  {
+    label: "Email",
+    href: "mailto:hi@ohno104.dev",
+    iconSrc: "/icon/email.svg",
+  },
 ];
 
 const selectedApp = ref(null);
@@ -303,6 +259,25 @@ function handlePointerUp() {
 function handlePointerLeave() {
   isCursorVisible.value = false;
   isCursorPressed.value = false;
+}
+
+async function handleContentClick(event) {
+  const copyButton = event.target.closest("[data-copy-value]");
+
+  if (!copyButton) {
+    return;
+  }
+
+  await navigator.clipboard.writeText(copyButton.dataset.copyValue);
+  copyButton.classList.add("is-copied");
+  copyButton.title = "Copied";
+  copyButton.setAttribute("aria-label", "Copied");
+
+  window.setTimeout(() => {
+    copyButton.classList.remove("is-copied");
+    copyButton.title = "Copy";
+    copyButton.setAttribute("aria-label", `Copy ${copyButton.dataset.copyValue}`);
+  }, 1400);
 }
 
 onMounted(() => {
@@ -431,9 +406,7 @@ function toggleLauncher() {
         transform: `translate(${cursorX}px, ${cursorY}px)`,
       }"
       aria-hidden="true"
-    >
-      <span class="touch-cursor__core"></span>
-    </div>
+    ></div>
 
     <div class="desktop-art" aria-hidden="true">
       <div class="desktop-art__dots"></div>
@@ -488,60 +461,44 @@ function toggleLauncher() {
               ></span>
             </button>
 
-            <div class="profile">
+            <button
+              class="profile"
+              type="button"
+              @click="openWindow(profileItem)"
+            >
               <div class="profile__avatar">
                 <img :src="profileAvatar" alt="Felix Huang avatar" />
               </div>
               <div class="profile__meta">
                 <strong>Felix Huang</strong>
-                <span>Software Developer</span>
+                <span>About Me</span>
               </div>
-            </div>
+            </button>
 
             <div class="profile-actions">
-              <button
+              <a
                 v-for="action in userActions"
                 :key="action.label"
+                :href="action.href"
                 :title="action.label"
+                :aria-label="action.label"
+                :target="action.target"
+                rel="noreferrer"
               >
-                {{ action.icon }}
-              </button>
+                <img :src="action.iconSrc" :alt="action.label" />
+              </a>
             </div>
           </div>
 
           <div class="launcher__body">
-            <section class="launcher-card">
-              <div class="section-head">
-                <h2>Project</h2>
-              </div>
-
-              <div class="pinned-grid">
-                <button
-                  v-for="app in pinnedApps.slice(0, 9)"
-                  :key="app.name"
-                  class="app-tile"
-                  :class="{
-                    'app-tile--active':
-                      isWindowOpen && selectedApp?.name === app.name,
-                  }"
-                  @click="openWindow(app)"
-                >
-                  <div class="app-icon" :style="{ background: app.color }">
-                    {{ app.badge }}
-                  </div>
-                  <span>{{ app.name }}</span>
-                </button>
-              </div>
-            </section>
-
             <section class="launcher-card launcher-card--secondary">
               <div class="section-head section-head--recommended">
-                <h2>Game</h2>
+                <h2>Blockchain</h2>
               </div>
 
               <div class="recommended-grid">
                 <button
-                  v-for="item in recommendedItems"
+                  v-for="item in pinnedBlockchain"
                   :key="item.name"
                   class="app-tile app-tile--recommended"
                   :class="{
@@ -554,6 +511,54 @@ function toggleLauncher() {
                     {{ item.badge }}
                   </div>
                   <span>{{ item.name }}</span>
+                </button>
+              </div>
+            </section>
+
+            <section class="launcher-card launcher-card--secondary">
+              <div class="section-head section-head--recommended">
+                <h2>Game</h2>
+              </div>
+
+              <div class="recommended-grid">
+                <button
+                  v-for="item in pinnedGame"
+                  :key="item.name"
+                  class="app-tile app-tile--recommended"
+                  :class="{
+                    'app-tile--active':
+                      isWindowOpen && selectedApp?.name === item.name,
+                  }"
+                  @click="openWindow(item)"
+                >
+                  <div class="app-icon" :style="{ background: item.color }">
+                    {{ item.badge }}
+                  </div>
+                  <span>{{ item.name }}</span>
+                </button>
+              </div>
+            </section>
+
+            <section class="launcher-card launcher-card--secondary">
+              <div class="section-head section-head--recommended">
+                <h2>Project</h2>
+              </div>
+
+              <div class="recommended-grid">
+                <button
+                  v-for="app in pinnedProject"
+                  :key="app.name"
+                  class="app-tile app-tile--recommended"
+                  :class="{
+                    'app-tile--active':
+                      isWindowOpen && selectedApp?.name === app.name,
+                  }"
+                  @click="openWindow(app)"
+                >
+                  <div class="app-icon" :style="{ background: app.color }">
+                    {{ app.badge }}
+                  </div>
+                  <span>{{ app.name }}</span>
                 </button>
               </div>
             </section>
@@ -575,7 +580,12 @@ function toggleLauncher() {
                 class="detail-window__appicon"
                 :style="{ background: selectedApp?.color }"
               >
-                {{ selectedApp?.badge }}
+                <img
+                  v-if="selectedApp?.iconImage"
+                  :src="selectedApp.iconImage"
+                  :alt="`${selectedApp.name} icon`"
+                />
+                <template v-else>{{ selectedApp?.badge }}</template>
               </div>
               <div>
                 <strong>{{ selectedApp?.name }}</strong>
@@ -593,7 +603,11 @@ function toggleLauncher() {
           </div>
 
           <div class="detail-window__body">
-            <div class="markdown-slot" v-html="selectedApp?.contentHtml"></div>
+            <div
+              class="markdown-slot"
+              @click="handleContentClick"
+              v-html="selectedApp?.contentHtml"
+            ></div>
           </div>
         </div>
       </section>
@@ -716,16 +730,6 @@ button {
     border-color 140ms ease;
 }
 
-.touch-cursor__core {
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: rgba(15, 23, 42, 0.58);
-  box-shadow:
-    0 0 0 2px rgba(255, 255, 255, 0.44),
-    0 0 0 3px rgba(15, 23, 42, 0.08);
-}
-
 .touch-cursor--pressed {
   width: 22px;
   height: 22px;
@@ -748,13 +752,6 @@ button {
     0 0 0 1.5px rgba(15, 23, 42, 0.22),
     0 10px 28px rgba(2, 6, 23, 0.28),
     0 0 0 6px rgba(15, 23, 42, 0.08);
-}
-
-.touch-cursor--dark .touch-cursor__core {
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow:
-    0 0 0 2px rgba(15, 23, 42, 0.26),
-    0 0 0 3px rgba(255, 255, 255, 0.08);
 }
 
 .touch-cursor--dark.touch-cursor--pressed {
@@ -939,11 +936,28 @@ button {
 }
 
 .profile {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
   display: flex;
   align-items: center;
   gap: 20px;
   color: #1f2937;
   font-size: 15px;
+  text-align: left;
+  border-radius: 22px;
+  transition:
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.profile:hover {
+  background: rgba(15, 23, 42, 0.05);
+}
+
+.profile:active {
+  transform: translateY(1px);
 }
 
 .profile__avatar,
@@ -973,6 +987,13 @@ button {
   display: block;
 }
 
+.detail-window__appicon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .profile__meta strong,
 .profile__meta span {
   display: block;
@@ -993,14 +1014,14 @@ button {
   gap: 14px;
 }
 
-.profile-actions button,
+.profile-actions a,
 .section-head button,
 .catalog-head button {
   border: 0;
   background: transparent;
 }
 
-.profile-actions button {
+.profile-actions a {
   width: 46px;
   height: 46px;
   border-radius: 14px;
@@ -1008,11 +1029,18 @@ button {
   color: #334155;
   border: 1px solid #e5e7eb;
   cursor: pointer;
-  font-size: 15px;
-  font-weight: 700;
+  display: grid;
+  place-items: center;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.88),
     0 10px 22px rgba(15, 23, 42, 0.08);
+}
+
+.profile-actions a img {
+  width: 22px;
+  height: 22px;
+  display: block;
+  object-fit: contain;
 }
 
 .launcher__body {
@@ -1047,27 +1075,10 @@ button {
   overflow: hidden;
   padding: 22px 20px 24px;
   border-radius: 24px;
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255, 255, 255, 0.34) 0%,
-      rgba(255, 255, 255, 0.08) 34%,
-      rgba(255, 255, 255, 0.02) 100%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.46),
-      rgba(244, 247, 251, 0.2)
-    ),
-    linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.16),
-      rgba(255, 255, 255, 0.04)
-    );
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(248, 250, 252, 0.24);
+  border: 1px solid rgba(226, 232, 240, 0.56);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.68),
-    inset 0 18px 32px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.52),
     0 18px 34px rgba(15, 23, 42, 0.05);
   backdrop-filter: blur(18px);
   opacity: 1;
@@ -1082,43 +1093,12 @@ button {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background:
-    linear-gradient(
-      120deg,
-      rgba(255, 255, 255, 0.52) 0%,
-      rgba(255, 255, 255, 0.14) 22%,
-      rgba(255, 255, 255, 0) 44%
-    ),
-    radial-gradient(
-      circle at 16% 2%,
-      rgba(255, 255, 255, 0.56),
-      transparent 30%
-    ),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 34%);
+  background: rgba(255, 255, 255, 0.06);
   pointer-events: none;
 }
 
 .launcher-card::after {
-  content: "";
-  position: absolute;
-  top: -22%;
-  left: -48%;
-  width: 72%;
-  height: 160%;
-  border-radius: 999px;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.08) 24%,
-    rgba(255, 255, 255, 0.3) 50%,
-    rgba(255, 255, 255, 0.08) 76%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  transform: rotate(18deg);
-  opacity: 0.78;
-  mix-blend-mode: screen;
-  pointer-events: none;
-  animation: glass-sheen 6.4s ease-in-out infinite;
+  content: none;
 }
 
 .launcher-card--secondary {
@@ -1509,11 +1489,15 @@ button {
     gap: 10px;
   }
 
-  .profile-actions button {
+  .profile-actions a {
     width: 40px;
     height: 40px;
     border-radius: 12px;
-    font-size: 13px;
+  }
+
+  .profile-actions a img {
+    width: 20px;
+    height: 20px;
   }
 
   .launcher-toggle {
@@ -1671,11 +1655,15 @@ button {
     gap: 8px;
   }
 
-  .profile-actions button {
+  .profile-actions a {
     width: 36px;
     height: 36px;
     border-radius: 11px;
-    font-size: 12px;
+  }
+
+  .profile-actions a img {
+    width: 18px;
+    height: 18px;
   }
 
   .launcher-toggle {
