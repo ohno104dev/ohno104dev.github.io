@@ -1,9 +1,9 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
-import bgDesktop from "./assets/bg-desktop.webp";
-import bgMobile from "./assets/bg-mobile.webp";
-import bgTablet from "./assets/bg-tablet.webp";
-import bgTabletLandscape from "./assets/bg-tablet-landscape.webp";
+import bgDesktop from "./assets/bg-desktop.png";
+import bgMobile from "./assets/bg-mobile.png";
+import bgTablet from "./assets/bg-tablet.png";
+import bgTabletLandscape from "./assets/bg-tablet-landscape.png";
 import underConstructionContent from "./content/under-construction.html?raw";
 import profileAvatar from "./assets/profile-avatar.webp";
 
@@ -461,7 +461,10 @@ function toggleLauncher() {
       <p class="clock-panel__zone">UTC+8 Taipei</p>
     </section>
 
-    <section class="workspace" :class="{ 'workspace--detail-open': isWindowOpen }">
+    <section
+      class="workspace"
+      :class="{ 'workspace--detail-open': isWindowOpen }"
+    >
       <aside
         class="launcher"
         :class="{
