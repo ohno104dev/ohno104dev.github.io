@@ -7,12 +7,6 @@ import bgMobile from "./assets/bg-mobile.png";
 import bgTablet from "./assets/bg-tablet.png";
 import bgTabletLandscape from "./assets/bg-tablet-landscape.png";
 import aboutMeContent from "./content/about-me.html?raw";
-<<<<<<< HEAD
-import underConstructionContent from "./content/under-construction.html?raw";
-import web3Content from "./content/web3.html?raw";
-import profileAvatar from "./assets/profile-avatar.webp";
-
-=======
 import crazyShotgunContentTemplate from "./content/crazy-shotgun.html?raw";
 import liliRunContentTemplate from "./content/lili-run.html?raw";
 import topGunContentTemplate from "./content/topgun-shooter.html?raw";
@@ -47,7 +41,6 @@ const crazyShotgunContent = createGameContent(
   "http://localhost:5173/games/crazy-shotgun/",
 );
 
->>>>>>> main
 const profileItem = {
   name: "Felix Huang",
   badge: "F",
@@ -58,16 +51,9 @@ const profileItem = {
 };
 
 function createGradientFromName(name) {
-<<<<<<< HEAD
-  const hue = [...name].reduce(
-    (hash, character) => hash + character.charCodeAt(0),
-    0,
-  ) % 360;
-=======
   const hue =
     [...name].reduce((hash, character) => hash + character.charCodeAt(0), 0) %
     360;
->>>>>>> main
   const secondaryHue = (hue + 42) % 360;
 
   return `linear-gradient(135deg, hsl(${hue} 82% 62%), hsl(${secondaryHue} 78% 43%))`;
@@ -135,16 +121,6 @@ const pinnedProject = [
     detailTitle: "Gaming Workspace",
     contentHtml: underConstructionContent,
   },
-<<<<<<< HEAD
-].slice(0, 6).map(withGeneratedColor);
-
-const pinnedGame = [
-  {
-    name: "Grammarly",
-    badge: "G",
-    detailTitle: "Writing Workspace",
-    contentHtml: underConstructionContent,
-=======
 ]
   .slice(0, 6)
   .map(withGeneratedColor);
@@ -155,7 +131,6 @@ const pinnedGame = [
     badge: "L",
     detailTitle: "LiLi Run",
     contentHtml: liliRunContent,
->>>>>>> main
   },
   {
     name: "TopGun Shooter",
@@ -177,40 +152,6 @@ const pinnedBlockchain = [
   {
     name: "Web3",
     badge: "W",
-<<<<<<< HEAD
-    detailTitle: "Reading Notes",
-    contentHtml: underConstructionContent,
-  },
-  {
-    name: "Budget Estimate",
-    badge: "X",
-    detailTitle: "Budget Workspace",
-    contentHtml: underConstructionContent,
-  },
-  {
-    name: "MRP Impact",
-    badge: "X",
-    detailTitle: "Planning Workspace",
-    contentHtml: underConstructionContent,
-  },
-  {
-    name: "Figma",
-    badge: "F",
-    detailTitle: "Design Workspace",
-    contentHtml: underConstructionContent,
-  },
-  {
-    name: "Design Concepts",
-    badge: "P",
-    detailTitle: "Concept Workspace",
-    contentHtml: underConstructionContent,
-  },
-].slice(0, 3).map(withGeneratedColor);
-
-const pinnedBlockchain = [
-  {
-    name: "Web3",
-    badge: "W",
     detailTitle: "Web3 pages",
     contentHtml: web3Content,
   },
@@ -226,23 +167,6 @@ const pinnedBlockchain = [
     detailTitle: "Web3 Workspace",
     contentHtml: underConstructionContent,
   },
-=======
-    detailTitle: "Web3 pages",
-    contentHtml: web3Content,
-  },
-  {
-    name: "Ethereum",
-    badge: "E",
-    detailTitle: "Smart Contract Workspace",
-    contentHtml: underConstructionContent,
-  },
-  {
-    name: "Solana",
-    badge: "S",
-    detailTitle: "Web3 Workspace",
-    contentHtml: underConstructionContent,
-  },
->>>>>>> main
 ].map(withGeneratedColor);
 
 const userActions = [
@@ -367,14 +291,10 @@ async function handleContentClick(event) {
   window.setTimeout(() => {
     copyButton.classList.remove("is-copied");
     copyButton.title = "Copy";
-<<<<<<< HEAD
-    copyButton.setAttribute("aria-label", `Copy ${copyButton.dataset.copyValue}`);
-=======
     copyButton.setAttribute(
       "aria-label",
       `Copy ${copyButton.dataset.copyValue}`,
     );
->>>>>>> main
   }, 1400);
 }
 
