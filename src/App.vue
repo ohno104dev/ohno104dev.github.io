@@ -7,9 +7,39 @@ import bgMobile from "./assets/bg-mobile.png";
 import bgTablet from "./assets/bg-tablet.png";
 import bgTabletLandscape from "./assets/bg-tablet-landscape.png";
 import aboutMeContent from "./content/about-me.html?raw";
+import crazyShotgunContentTemplate from "./content/crazy-shotgun.html?raw";
+import liliRunContentTemplate from "./content/lili-run.html?raw";
+import topGunContentTemplate from "./content/topgun-shooter.html?raw";
 import underConstructionContent from "./content/under-construction.html?raw";
 import web3Content from "./content/web3.html?raw";
+import "./content/lili-run.css";
 import profileAvatar from "./assets/profile-avatar.webp";
+
+function createGameContent(contentTemplate, productionUrl, developmentUrl) {
+  if (!import.meta.env.DEV) {
+    return contentTemplate;
+  }
+
+  return contentTemplate.replaceAll(productionUrl, developmentUrl);
+}
+
+const liliRunContent = createGameContent(
+  liliRunContentTemplate,
+  "https://game-lili-run.ohno104.dev/",
+  "http://localhost:5173/games/lili-run/",
+);
+
+const topGunContent = createGameContent(
+  topGunContentTemplate,
+  "https://game-topgun-shooter.ohno104.dev/",
+  "http://localhost:5173/games/topgun-shooter/",
+);
+
+const crazyShotgunContent = createGameContent(
+  crazyShotgunContentTemplate,
+  "https://game-crazy-shotgun.ohno104.dev/",
+  "http://localhost:5173/games/crazy-shotgun/",
+);
 
 const profileItem = {
   name: "Felix Huang",
@@ -21,10 +51,9 @@ const profileItem = {
 };
 
 function createGradientFromName(name) {
-  const hue = [...name].reduce(
-    (hash, character) => hash + character.charCodeAt(0),
-    0,
-  ) % 360;
+  const hue =
+    [...name].reduce((hash, character) => hash + character.charCodeAt(0), 0) %
+    360;
   const secondaryHue = (hue + 42) % 360;
 
   return `linear-gradient(135deg, hsl(${hue} 82% 62%), hsl(${secondaryHue} 78% 43%))`;
@@ -92,46 +121,32 @@ const pinnedProject = [
     detailTitle: "Gaming Workspace",
     contentHtml: underConstructionContent,
   },
-].slice(0, 6).map(withGeneratedColor);
+]
+  .slice(0, 6)
+  .map(withGeneratedColor);
 
 const pinnedGame = [
   {
-    name: "Grammarly",
-    badge: "G",
-    detailTitle: "Writing Workspace",
-    contentHtml: underConstructionContent,
+    name: "LiLi Run",
+    badge: "L",
+    detailTitle: "LiLi Run",
+    contentHtml: liliRunContent,
   },
   {
-    name: "Book Report",
-    badge: "W",
-    detailTitle: "Reading Notes",
-    contentHtml: underConstructionContent,
+    name: "TopGun Shooter",
+    badge: "T",
+    detailTitle: "TopGun Shooter",
+    contentHtml: topGunContent,
   },
   {
-    name: "Budget Estimate",
-    badge: "X",
-    detailTitle: "Budget Workspace",
-    contentHtml: underConstructionContent,
+    name: "Crazy Shotgun",
+    badge: "C",
+    detailTitle: "Crazy Shotgun",
+    contentHtml: crazyShotgunContent,
   },
-  {
-    name: "MRP Impact",
-    badge: "X",
-    detailTitle: "Planning Workspace",
-    contentHtml: underConstructionContent,
-  },
-  {
-    name: "Figma",
-    badge: "F",
-    detailTitle: "Design Workspace",
-    contentHtml: underConstructionContent,
-  },
-  {
-    name: "Design Concepts",
-    badge: "P",
-    detailTitle: "Concept Workspace",
-    contentHtml: underConstructionContent,
-  },
-].slice(0, 3).map(withGeneratedColor);
+]
+  .slice(0, 3)
+  .map(withGeneratedColor);
 
 const pinnedBlockchain = [
   {
@@ -276,7 +291,10 @@ async function handleContentClick(event) {
   window.setTimeout(() => {
     copyButton.classList.remove("is-copied");
     copyButton.title = "Copy";
-    copyButton.setAttribute("aria-label", `Copy ${copyButton.dataset.copyValue}`);
+    copyButton.setAttribute(
+      "aria-label",
+      `Copy ${copyButton.dataset.copyValue}`,
+    );
   }, 1400);
 }
 
