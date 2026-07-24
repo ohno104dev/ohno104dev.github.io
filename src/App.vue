@@ -12,7 +12,8 @@ import liliRunContentTemplate from "./content/lili-run.html?raw";
 import topGunContentTemplate from "./content/topgun-shooter.html?raw";
 import underConstructionContent from "./content/under-construction.html?raw";
 import web3Content from "./content/web3.html?raw";
-import "./content/lili-run.css";
+import "./content/game-showcase.css";
+import "./content/under-construction.css";
 import profileAvatar from "./assets/profile-avatar.webp";
 
 function createGameContent(contentTemplate, productionUrl, developmentUrl) {
